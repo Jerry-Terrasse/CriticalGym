@@ -1,38 +1,17 @@
-<div
-  class="mdui-dialog cg-login-dialog"
-  id="login-dialog"
-  style="display: none"
->
-  <button class="mdui-btn mdui-btn-icon" mdui-dialog-close>
+<div class="mdui-dialog cg-login-dialog" id="login-dialog" style="display: none">
+  <!-- <button class="mdui-btn mdui-btn-icon" mdui-dialog-close>
     <i class="mdui-icon material-icons">close</i>
-  </button>
-  <div class="mdui-dialog-title">登录</div>
+  </button> -->
+  <div class="mdui-m-b-3">
+    <img src="/image/login.png" style="width: 100%;"/>
+  </div>
   <div class="cg-dialog-form">
-    <div
-      class="mdui-textfield mdui-textfield-floating-label mdui-textfield-has-bottom mdui-textfield-not-empty"
-    >
-      <label class="mdui-textfield-label">用户名或邮箱</label
-      ><input
-        class="mdui-textfield-input"
-        name="name"
-        type="text"
-        required=""
-        id="username"
-      />
+    <div class="mdui-textfield mdui-textfield-floating-label mdui-textfield-has-bottom mdui-textfield-not-empty">
+      <label class="mdui-textfield-label">用户名或邮箱</label><input class="mdui-textfield-input" name="name" type="text" required="" id="username" />
       <div class="mdui-textfield-error">账号不能为空</div>
     </div>
-    <div
-      class="mdui-textfield mdui-textfield-floating-label mdui-textfield-has-bottom mdui-textfield-not-empty"
-      id="mdui-textfield-password"
-    >
-      <label class="mdui-textfield-label">密码</label
-      ><input
-        class="mdui-textfield-input"
-        name="password"
-        type="password"
-        required=""
-        id="password"
-      />
+    <div class="mdui-textfield mdui-textfield-floating-label mdui-textfield-has-bottom mdui-textfield-not-empty" id="mdui-textfield-password">
+      <label class="mdui-textfield-label">密码</label><input class="mdui-textfield-input" name="password" type="password" required="" id="password" />
       <div class="mdui-textfield-error" id="password-error">密码不能为空</div>
     </div>
     <!-- <div
@@ -66,10 +45,7 @@
         <li class="mdui-menu-item"><a class="mdui-ripple">忘记密码</a></li>
         <li class="mdui-menu-item"><a class="mdui-ripple">创建新账号</a></li>
       </ul> -->
-      <button
-        class="mdui-btn mdui-btn-raised mdui-color-theme action-btn"
-        onclick="login()"
-      >
+      <button class="mdui-btn mdui-btn-raised mdui-color-theme action-btn mdui-color-theme-accent" onclick="login()">
         登录
       </button>
     </div>

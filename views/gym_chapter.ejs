@@ -9,7 +9,15 @@
           <a href="<%= chapter.problemStatus[i] == ENUMS.problem.locked ? 'javascript:locked_problem();' : `/gym/${chapter.group}/${chapter.chapter}/${i}` %>" class="mdui-btn mdui-btn-block"
 			<%= chapter.problemStatus[i] == ENUMS.problem.locked ? 'disabled' : '' %>
 		  >
-            <i class="mdui-list-item-icon mdui-icon material-icons">check</i>
+            <% if (chapter.problemStatus[i] == ENUMS.problem.solved) { %>
+              <i class="mdui-icon material-icons">check</i>
+            <% } else if(chapter.problemStatus[i] == ENUMS.problem.fresh) { %>
+              <i class="mdui-icon material-icons">schedule</i>
+            <% } else if(chapter.problemStatus[i] == ENUMS.problem.requesting_resubmit) { %>
+              <i class="mdui-icon material-icons">autorenew</i>
+            <% } else { %>
+              <i class="mdui-icon material-icons">lock</i>
+            <% } %>
             <%= chapter.problems[i].name %>
           </a>
         </li>

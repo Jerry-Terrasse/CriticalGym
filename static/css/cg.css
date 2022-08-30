@@ -64,7 +64,7 @@
   float: right;
 }
 .mdui-theme-layout-dark .cg-login-dialog .action-btn {
-  background-color: #525252 !important;
+  /* background-color: #525252 !important; */
 }
 @media (max-width: 599.9px) {
   .cg-login-dialog {
@@ -226,8 +226,22 @@ a {
 
 p {
   font-size: large;
+  line-height: 1.5em;
 }
 
-ul {
+li {
   font-size: large;
+  line-height: 1.5em;
+}
+
+.mdui-list a {
+  font-size: x-large;
+}
+
+#login-dialog.mdui-dialog-open {
+  transform: scale(1.25);
+}
+
+.mdui-overlay {
+  background: rgba(0, 0, 0, .7);
 }
