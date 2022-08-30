@@ -1,0 +1,15 @@
+<%- include('header') %>
+
+<div class="mdui-container-fluid">
+  <div class="mdui-container mdui-center cg-default-margin">
+    <div class="mdui-card cg-problem-list">
+      <ul class="mdui-list">
+        <% for(let i=0; i<submissions.length; ++i) { %>
+		<%- include('submission_item', {submission: submissions[i], problem: problems[i], user: user, Status: Status, Color: Color}) %>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<%- include('footer') %>

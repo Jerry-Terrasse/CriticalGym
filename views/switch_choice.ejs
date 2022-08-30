@@ -1,0 +1,8 @@
+<select id="switch_choice" class="mdui-select" mdui-select="<%= user.choice %>" style="overflow: visible;" onchange="switch_choice();">
+  <% for(let group of ENUMS.group_values) { %>
+    <option value="<%= group %>"
+      <%= ((1 << group) & user.permission) ? '' : 'disabled' %>
+      <%= group == user.choice ? 'selected' : '' %>
+    ><%= ENUMS.group_names[group] %></option>
+  <% } %>
+</select>

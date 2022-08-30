@@ -1,0 +1,22 @@
+<%- include('header') %>
+
+<div class="mdui-container-fluid">
+  <div class="mdui-container mdui-center cg-default-margin">
+    <div class="mdui-card cg-problem-list">
+      <ul class="mdui-list">
+        <% for(i in chapter.problems) { %>
+        <li class="mdui-list-item mdui-ripple">
+          <a href="<%= chapter.problemStatus[i] == ENUMS.problem.locked ? 'javascript:locked_problem();' : `/gym/${chapter.group}/${chapter.chapter}/${i}` %>" class="mdui-btn mdui-btn-block"
+			<%= chapter.problemStatus[i] == ENUMS.problem.locked ? 'disabled' : '' %>
+		  >
+            <i class="mdui-list-item-icon mdui-icon material-icons">check</i>
+            <%= chapter.problems[i].name %>
+          </a>
+        </li>
+        <% } %>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<%- include('footer') %>

@@ -1,0 +1,63 @@
+<%- include('header') %>
+
+<div class="mdui-container-fluid">
+  <div class="mdui-container mdui-center" style="margin: 2em; max-width: 1664px">
+    <div class="mdui-container mdui-card">
+      <div class="mdui-typo-display-1 mdui-text-center" style="margin-top: 1em;">
+        <%- problem.name %>
+      </div>
+      <div class="mdui-container mdui-card-content">
+        <hr>
+        <div id="problem-content"></div>
+      </div>
+    </div>
+  </div>
+  <button id="submit-button" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent">
+    <i class="mdui-icon material-icons">send</i>
+  </button>
+  <input id="submit-dummy" class="mdui-hidden" type="file" multiple/>
+</div>
+
+<script>
+  var description_url = "/api/problem_content/<%= problem.id %>";
+  $.get(description_url, function(data) {
+    if (data.success) {
+      var md = marked.parse(data.data);
+      $("#problem-content").html(md);
+      rerender();
+    } else {
+      $("#problem-content").html(data.message);
+    }
+  });
+  $("#submit-button").click(function() {
+    $("#submit-dummy").click();
+  });
+  $("#submit-dummy").change(function() {
+    var formData = new FormData();
+    formData.append("problem_id", "<%= problem.id %>");
+    formData.append("code", $("#submit-dummy")[0].files[0]);
+    $.ajax({
+      url: "/api/submit",
+      type: "POST",
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: function(data) {
+        if (data.success) {
+          mdui.snackbar({
+            message: "提交成功",
+            timeout: 2000,
+          });
+          window.location = data.url;
+        } else {
+          mdui.snackbar({
+            message: data.message,
+            timeout: 2000,
+          });
+        }
+      },
+    });
+  });
+</script>
+<%- include('footer') %>
+</div>

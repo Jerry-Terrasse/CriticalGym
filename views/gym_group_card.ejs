@@ -1,0 +1,18 @@
+<div class="mdui-col-lg-4 mdui-col-sm-6 mdui-p-a-3">
+  <a href="<%= `/gym/${chapter.group}/${chapter.chapter}` %>">
+    <div class="mdui-card">
+      <div class="mdui-card-media">
+        <img src="/image/chapter_cover.jpg" class="video-img" />
+        <div class="mdui-card-media-covered">
+          <div class="mdui-card-primary">
+            <div class="mdui-card-primary-title"><%= chapter.title %></div>
+            <div class="mdui-card-primary-subtitle"><%= `${ENUMS.chapter[chapter.status]}, ${chapter.progress}` %></div>
+          </div>
+        </div>
+      </div>
+      <!-- <div class="mdui-card-actions">
+		  <p></p>
+		</div> -->
+    </div>
+  </a>
+</div>

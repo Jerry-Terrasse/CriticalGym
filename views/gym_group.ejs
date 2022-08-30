@@ -1,0 +1,11 @@
+<%- include('header') %>
+
+<div class="mdui-container-fluid">
+  <div class="mdui-container mdui-center cg-default-margin">
+    <% for(let chapter of chapters) { %>
+     <%- include('gym_group_card', { chapter: chapter }) %>
+    <% } %>
+  </div>
+</div>
+
+<%- include('footer') %>
