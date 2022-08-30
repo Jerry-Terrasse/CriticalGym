@@ -12,7 +12,11 @@
       </div>
     </div>
   </div>
-  <button id="submit-button" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent">
+  <button id="submit-button" class="mdui-fab mdui-fab-fixed mdui-ripple mdui-color-theme-accent"
+    <% if (status != ENUMS.problem.fresh) { %>
+      disabled
+    <% } %>
+  >
     <i class="mdui-icon material-icons">send</i>
   </button>
   <input id="submit-dummy" class="mdui-hidden" type="file" multiple/>
@@ -34,10 +38,11 @@
   });
   $("#submit-dummy").change(function() {
     var formData = new FormData();
-    formData.append("problem_id", "<%= problem.id %>");
-    formData.append("code", $("#submit-dummy")[0].files[0]);
+    for(var file of $("#submit-dummy")[0].files) {
+      formData.append("files", file);
+    }
     $.ajax({
-      url: "/api/submit",
+      url: "/api/upload/<%= problem.id %>",
       type: "POST",
       data: formData,
       processData: false,
@@ -45,14 +50,16 @@
       success: function(data) {
         if (data.success) {
           mdui.snackbar({
-            message: "提交成功",
+            message: data.message,
             timeout: 2000,
           });
-          window.location = data.url;
+          setTimeout(function() {
+            window.location.reload();
+          }, 2000);
         } else {
           mdui.snackbar({
             message: data.message,
-            timeout: 2000,
+            timeout: 5000,
           });
         }
       },

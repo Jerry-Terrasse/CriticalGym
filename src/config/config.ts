@@ -3,12 +3,18 @@ import fs from 'fs';
 class Config {
 	configFile: string;
 	secret: string;
+	uploadDir: string;
+	maxFileSize: number;
+	maxFieldsSize: number;
 	db: DBConfig;
 	constructor(configFile: string) {
 		this.configFile = configFile;
 		let data = JSON.parse(fs.readFileSync(configFile, 'utf8'));
 
 		this.secret = data.secret;
+		this.uploadDir = data.uploadDir;
+		this.maxFileSize = data.maxFileSize;
+		this.maxFieldsSize = data.maxFieldsSize;
 
 		this.db = new DBConfig(data.db);
 	}

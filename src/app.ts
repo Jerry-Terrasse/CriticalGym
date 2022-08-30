@@ -1,6 +1,6 @@
 import os from "os";
 import express from "express";
-import formData from "express-form-data";
+// import formData from "express-form-data";
 import config from "./config/config";
 import problemManager, { hasPermission, groupNames, isInvalidGroup, Group, Chapter, Problem, ChapterStatusEnum, ProblemStatusEnum } from "./problem/problem";
 import { User, userManager } from "./user/user";
@@ -8,6 +8,8 @@ import * as session from "express-session";
 import expressMySqlSession from "express-mysql-session";
 import fs from "fs";
 import { ENUMS, readStream, submissionStatusColor } from "./utils/utils";
+import multer from 'multer';
+import submissionManager from "./submission/submission";
 
 const app: express.Application = express();
 const ExpressMySqlStoreSession = expressMySqlSession(session);
@@ -22,10 +24,10 @@ declare module "express-session" {
   }
 }
 
-const formDataoptions = {
-  uploadDir: os.tmpdir(),
-  autoClean: true,
-};
+// const formDataoptions = {
+//   uploadDir: os.tmpdir(),
+//   autoClean: true,
+// };
 
 const sessionOptions = {
   connectionLimit: 10,
@@ -59,13 +61,97 @@ app.use(
 );
 
 // parse data with connect-multiparty.
-app.use(formData.parse(formDataoptions));
+// app.use(formData.parse(formDataoptions));
 // delete from the request all empty files (size == 0)
-app.use(formData.format());
+// app.use(formData.format());
 // change the file objects to fs.ReadStream
-app.use(formData.stream());
+// app.use(formData.stream());
 // union the body and the files
-app.use(formData.union());
+// app.use(formData.union());
+
+app.locals.submitDirMap = new Map<number, string>(); // to make sure the files uploaded are stored in the same directory
+let storage = multer.diskStorage({
+  destination: async function (req, file, cb) {
+    let user = req.session.user;
+    if(!user) {
+      cb(new Error("Not logged in"), "");
+      return;
+    }
+    let dir = req.app.locals.submitDirMap.get(user.id);
+    if(!dir) {
+      cb(new Error("Auth failed"), "");
+      return;
+    }
+    fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+    return;
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  }
+});
+
+let upload = multer({
+  storage: storage,
+  limits: { fileSize: config.maxFileSize, fields: config.maxFieldsSize },
+});
+
+app.post(
+  "/api/upload/:problem_id",
+  async (req, res, next) => {
+    let user = req.session.user;
+    if(!user) {
+      return res.json({ success: false, message: "You are not logged in" });
+    }
+    let problem_id = parseInt(req.params.problem_id);
+    if(Number.isNaN(problem_id)) {
+      return res.json({ success: false, message: "Invalid problem id" });
+    }
+    let problem = await problemManager.getProblemById(problem_id);
+    if(!problem) {
+      return res.json({ success: false, message: "Problem not found" });
+    }
+    if(problem.group != user.choice) {
+      return res.json({ success: false, message: "Permission denied" });
+    }
+    let chapterDetail = await problemManager.getChapterDetail({ group: problem.group, chapter: problem.chapter }, user);
+    if(chapterDetail.status == ChapterStatusEnum.locked || chapterDetail.problemStatus[problem.index] == ProblemStatusEnum.locked) {
+      return res.json({ success: false, message: "Permission denied" });
+    }
+    if(chapterDetail.problemStatus[problem.index] == ProblemStatusEnum.solved) {
+      return res.json({ success: false, message: "You have already solved this problem, you can commit a request to re-submit" });
+    }
+    if(chapterDetail.problemStatus[problem.index] == ProblemStatusEnum.requesting_resubmit) {
+      return res.json({ success: false, message: "Please wait for the admin to review your request" });
+    }
+    // send to the next middleware
+    let dir = `${config.uploadDir}/${Group[problem.group]}/${user.id}/${chapterDetail.chapter}_${problem.index}_${Date.now()}`;
+    req.app.locals.submitDirMap.set(user.id, dir);
+    res.locals.user = user;
+    res.locals.problem = problem;
+    res.locals.chapter = chapterDetail;
+    next();
+  },
+  upload.array("files"),
+  async (req, res) => {
+    // The permission check is done in the destination function.
+
+    let user: User = res.locals.user;
+    let problem: Problem = res.locals.problem;
+    let dir = req.app.locals.submitDirMap.get(user.id);
+    if(!dir) {
+      return res.json({ success: false, message: "Auth failed" });
+    }
+
+    try {
+      await submissionManager.addSubmission(problem, user, dir);
+    } catch(err) {
+      return res.json({ success: false, message: "Unknown error" });
+    }
+    
+    res.json({ success: true, message: "Upload success" });
+  }
+);
 
 app.get("/", (req: express.Request, res: express.Response) => {
   res.render("index", { user: req.session.user, ENUMS: ENUMS });
@@ -206,92 +292,7 @@ app.get(
     userManager.switch_choice(user, choice);
     res.json({ success: true });
   }
-)
-
-app.post("/api/submit", async (req: express.Request, res: express.Response) => {
-  // let user = req.session.user;
-  // if (!user) {
-  //   res.json({ success: false, message: "Not logged in" });
-  //   return;
-  // }
-  // let problem_id = parseInt(req.body.problem_id);
-  // if (!problem_id) {
-  //   res.json({ success: false, message: "Invalid problem id" });
-  //   return;
-  // }
-  // let problem = problemManager.getProblem(problem_id);
-  // if (problem.empty) {
-  //   res.json({ success: false, message: "Problem not found" });
-  //   return;
-  // }
-  // let user_permission = user.permission;
-  // user_permission = user_permission ? user_permission : 0;
-  // if (problem.permission > user_permission) {
-  //   res.json({
-  //     success: false,
-  //     message: "You do not have permission to submit",
-  //   });
-  //   return;
-  // }
-  // let codeStream: fs.ReadStream = req.body.code;
-  // let code = await readStream(codeStream);
-  // if (code.length < 1) {
-  //   res.json({ success: false, message: "Empty code" });
-  //   return;
-  // }
-  // // let language = req.body.language; TODO
-  // let language = Language.cpp;
-  // let submissionId = -1;
-  // try {
-  //   submissionId = await submissionManager.addSubmission(
-  //     problem_id,
-  //     user.id,
-  //     language,
-  //     { code: code }
-  //   );
-  //   res.json({ success: true, url: `/submission/${submissionId}` });
-  // } catch (e) {
-  //   let message = "";
-  //   if (e instanceof Error) {
-  //     message = e.message;
-  //   } else {
-  //     console.log(`Unknown error: ${e}`);
-  //     message = "Unknown Error ${e}";
-  //   }
-  //   if (submissionId != -1) {
-  //     await submissionManager.setSubmissionFailStatus(
-  //       submissionId,
-  //       SubmissionStatus.UE,
-  //       { code: code, error: message }
-  //     );
-  //   }
-  //   if (e instanceof FailSubmission) {
-  //     res.json({ success: false, message: e.message });
-  //   } else {
-  //     console.log(e);
-  //     res.json({ success: false, message: "Unknown error" });
-  //   }
-  // }
-  // try {
-  //   await judger.judge(user, problem, language, code, submissionId);
-  // } catch (e) {
-  //   let message = "";
-  //   if (e instanceof Error) {
-  //     message = e.message;
-  //   } else {
-  //     message = "Unknown Error ${e}";
-  //   }
-  //   console.log(`Judge Error: ${message}`);
-  //   if (submissionId != -1) {
-  //     await submissionManager.setSubmissionFailStatus(
-  //       submissionId,
-  //       SubmissionStatus.UE,
-  //       { code: code, error: message }
-  //     );
-  //   }
-  // }
-  // return;
-});
+);
 
 app.post("/login", async (req: express.Request, res: express.Response) => {
   let username: string = req.body.username;
