@@ -6,8 +6,11 @@
         <div class="mdui-card-media-covered">
           <div class="mdui-card-primary">
             <div class="mdui-card-primary-title"><%= chapter.title %></div>
-            <div class="mdui-card-primary-subtitle"><%= `${ENUMS.chapter[chapter.status]}, ${chapter.progress}` %></div>
+            <!-- <div class="mdui-card-primary-subtitle"><%= `${ENUMS.chapter[chapter.status]}, ${chapter.progress}` %></div> -->
           </div>
+        </div>
+        <div class="mdui-progress">
+          <div class="mdui-progress-determinate mdui-color-theme-accent" style="width: <%= chapter.progress / chapter.problems.length * 100 %>%;"></div>
         </div>
       </div>
       <!-- <div class="mdui-card-actions">
